@@ -1,8 +1,10 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.ServiceBus.Messaging;
+using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using Newtonsoft.Json;
 
 
 namespace Cloud2PartnerFunc
@@ -13,6 +15,15 @@ namespace Cloud2PartnerFunc
         public static void Run([ServiceBusTrigger("cloud2fidotopic", "Partner", AccessRights.Manage, Connection = "Connection")]string mySbMsg, TraceWriter log)
         {
             log.Info($"C# ServiceBus topic trigger function processed message: {mySbMsg}");
+
+            DataSet dataSet = JsonConvert.DeserializeObject<DataSet>(mySbMsg);
+
+            DataTable dataTable = dataSet.Tables["Sources"];
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                log.Info($"{row["name"]} ");
+            }
 
             try
             {
